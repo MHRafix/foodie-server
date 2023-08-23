@@ -1,0 +1,179 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type PagniationMeta {
+  totalCount: Float!
+  currentPage: Float!
+  hasNextPage: Boolean!
+  totalPages: Float!
+}
+
+type ServiceTypes {
+  _id: ID
+  name: String
+  description: String
+  status: SERVICE_STATUS!
+  image: String
+  itemsCount: Int
+}
+
+enum SERVICE_STATUS {
+  PUBLISHED
+  BLOCKED
+  PAUSED
+}
+
+type ServiceTypesPagination {
+  nodes: [ServiceTypes!]
+  meta: PagniationMeta
+}
+
+type User {
+  _id: ID
+  name: String
+  email: String
+  role: USER_ROLE!
+  password: String!
+  avatar: String
+  accessToken: String
+  phone: String
+}
+
+enum USER_ROLE {
+  ADMIN
+  MODERATOR
+  CUSTOMER
+}
+
+type UserPagination {
+  nodes: [User!]
+  meta: PagniationMeta
+}
+
+type Query {
+  users(payload: UserListQueryDto): UserPagination!
+  user(payload: CommonMatchInput!): User!
+  ServiceTypes(payload: ServiceTypesListQueryDto): ServiceTypesPagination!
+  serviceType(id: Int!): ServiceTypes!
+}
+
+input UserListQueryDto {
+  page: Int
+  limit: Int
+  sort: SortType
+  sortBy: String
+  filters: [CommonMatchInput!]
+  filterOperator: WHERE_OPERATOR
+}
+
+enum SortType {
+  ASC
+  DESC
+}
+
+input CommonMatchInput {
+  key: String!
+  operator: MatchOperator!
+  value: String
+}
+
+enum MatchOperator {
+  eq
+  ne
+  gt
+  gte
+  lt
+  lte
+  in
+  nin
+  exists
+  contains
+}
+
+enum WHERE_OPERATOR {
+  and
+  or
+}
+
+input ServiceTypesListQueryDto {
+  page: Int
+  limit: Int
+  sort: SortType
+  sortBy: String
+  filters: [CommonMatchInput!]
+  filterOperator: WHERE_OPERATOR
+}
+
+type Mutation {
+  signUp(payload: CreateUserInput!): User!
+  signIn(payload: CreateUserInput!): User!
+  adminSignIn(payload: CreateUserInput!): User!
+  updateUser(payload: UpdateUserInput!): User!
+  removeUser(payload: CommonMatchInput!): Boolean
+  bulkRemoveUser(uIds: [String!]!): Boolean
+  createServiceType(payload: CreateServiceTypeInput!): ServiceTypes!
+  updateServiceType(updateServiceTypeInput: UpdateServiceTypeInput!): ServiceTypes!
+  removeServiceType(id: Int!): ServiceTypes!
+}
+
+input CreateUserInput {
+  _id: ID
+
+  """User name"""
+  name: String
+
+  """User email"""
+  email: String!
+
+  """User role"""
+  role: USER_ROLE
+
+  """User password"""
+  password: String!
+
+  """User avatar"""
+  avatar: String
+  accessToken: String
+  phone: String
+}
+
+input UpdateUserInput {
+  _id: String
+
+  """User name"""
+  name: String
+
+  """User email"""
+  email: String
+
+  """User role"""
+  role: USER_ROLE
+
+  """User password"""
+  password: String
+
+  """User avatar"""
+  avatar: String
+  accessToken: String
+  phone: String
+}
+
+input CreateServiceTypeInput {
+  _id: ID
+  name: String
+  description: String
+  status: SERVICE_STATUS! = PUBLISHED
+  image: String
+  itemsCount: Int
+}
+
+input UpdateServiceTypeInput {
+  _id: ID
+  name: String
+  description: String
+  status: SERVICE_STATUS = PUBLISHED
+  image: String
+  itemsCount: Int
+  id: Int!
+}
