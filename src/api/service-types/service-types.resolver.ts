@@ -1,7 +1,13 @@
 import { GqlAuthGuard } from '@/src/app/config/jwtGqlGuard';
+import { CommonMatchInput } from '@/src/shared/dto/CommonFindOneDto';
+import { mongodbFindObjectBuilder } from '@/src/shared/utils/filterBuilder';
 import getGqlFields from '@/src/shared/utils/get-gql-fields';
-import { BadRequestException, UseGuards } from '@nestjs/common';
-import { Args, Info, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
+import {
+  BadRequestException,
+  ForbiddenException,
+  UseGuards,
+} from '@nestjs/common';
+import { Args, Info, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { CreateServiceTypeInput } from './dto/create-service-type.input';
 import { ServiceTypesListQueryDto } from './dto/service-types-list.input';
 import { UpdateServiceTypeInput } from './dto/update-service-type.input';
@@ -15,10 +21,11 @@ import { ServiceTypesService } from './service-types.service';
 export class ServiceTypesResolver {
   constructor(private readonly serviceTypesService: ServiceTypesService) {}
 
-  @Mutation(() => ServiceTypes)
-  createServiceType(@Args('payload') payload: CreateServiceTypeInput) {
+  @Mutation(() => Boolean)
+  async createServiceType(@Args('payload') payload: CreateServiceTypeInput) {
     try {
-      return this.serviceTypesService.create(payload);
+      await this.serviceTypesService.create(payload);
+      return true;
     } catch (err) {
       throw new BadRequestException(err.message);
     }
@@ -39,23 +46,36 @@ export class ServiceTypesResolver {
   }
 
   @Query(() => ServiceTypes, { name: 'serviceType' })
-  findOne(@Args('id', { type: () => Int }) id: number) {
-    return this.serviceTypesService.findOne(id);
+  @UseGuards(GqlAuthGuard)
+  findOne(@Args('payload') payload: CommonMatchInput) {
+    try {
+      const find = mongodbFindObjectBuilder(payload);
+      return this.serviceTypesService.findOne(find);
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
   }
 
-  @Mutation(() => ServiceTypes)
-  updateServiceType(
-    @Args('updateServiceTypeInput')
-    updateServiceTypeInput: UpdateServiceTypeInput,
-  ) {
-    return this.serviceTypesService.update(
-      updateServiceTypeInput.id,
-      updateServiceTypeInput,
-    );
+  @Mutation(() => Boolean)
+  @UseGuards(GqlAuthGuard)
+  async updateServiceType(@Args('payload') payload: UpdateServiceTypeInput) {
+    try {
+      await this.serviceTypesService.update(payload._id, payload);
+      return true;
+    } catch (err) {
+      throw new BadRequestException(err.message);
+    }
   }
 
-  @Mutation(() => ServiceTypes)
-  removeServiceType(@Args('id', { type: () => Int }) id: number) {
-    return this.serviceTypesService.remove(id);
+  @Mutation(() => Boolean)
+  @UseGuards(GqlAuthGuard)
+  async removeServiceType(@Args('payload') payload: CommonMatchInput) {
+    try {
+      const find = mongodbFindObjectBuilder(payload);
+      const res = await this.serviceTypesService.remove(find);
+      return res.deletedCount > 0;
+    } catch (error) {
+      throw new ForbiddenException(error.message);
+    }
   }
 }

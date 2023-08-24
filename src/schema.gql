@@ -55,7 +55,7 @@ type Query {
   users(payload: UserListQueryDto): UserPagination!
   user(payload: CommonMatchInput!): User!
   ServiceTypes(payload: ServiceTypesListQueryDto): ServiceTypesPagination!
-  serviceType(id: Int!): ServiceTypes!
+  serviceType(payload: CommonMatchInput!): ServiceTypes!
 }
 
 input UserListQueryDto {
@@ -112,9 +112,9 @@ type Mutation {
   updateUser(payload: UpdateUserInput!): User!
   removeUser(payload: CommonMatchInput!): Boolean
   bulkRemoveUser(uIds: [String!]!): Boolean
-  createServiceType(payload: CreateServiceTypeInput!): ServiceTypes!
-  updateServiceType(updateServiceTypeInput: UpdateServiceTypeInput!): ServiceTypes!
-  removeServiceType(id: Int!): ServiceTypes!
+  createServiceType(payload: CreateServiceTypeInput!): Boolean!
+  updateServiceType(payload: UpdateServiceTypeInput!): Boolean!
+  removeServiceType(payload: CommonMatchInput!): Boolean!
 }
 
 input CreateUserInput {

@@ -1,9 +1,9 @@
 import { AppPaginationResponse } from '@/src/shared/contracts/app-pagination-response';
 import { SortType } from '@/src/shared/dto/CommonPaginationDto';
 import { filterBuilder } from '@/src/shared/utils/filterBuilder';
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { FilterQuery, Model } from 'mongoose';
 import { CreateServiceTypeInput } from './dto/create-service-type.input';
 import { ServiceTypesListQueryDto } from './dto/service-types-list.input';
 import { UpdateServiceTypeInput } from './dto/update-service-type.input';
@@ -47,15 +47,43 @@ export class ServiceTypesService {
     });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} serviceType`;
+  /**
+   * get single serviceTypes
+   * @param _id single serviceTypes id
+   * @returns
+   */
+  async findOne(
+    filter: FilterQuery<ServiceTypesDocument>,
+    fields: string[] = [],
+  ) {
+    try {
+      const data = await this.serviceTypesModel.findOne(filter);
+
+      if (!data) {
+        throw new ForbiddenException('Data is not found');
+      }
+      return data;
+    } catch (err) {
+      throw new ForbiddenException(err.message);
+    }
   }
 
-  update(id: number, updateServiceTypeInput: UpdateServiceTypeInput) {
-    return `This action updates a #${id} serviceType`;
+  /**
+   * update service
+   * @param _id service id
+   * @param input update payload
+   * @returns
+   */
+  update(_id: string, updateUserInput: UpdateServiceTypeInput) {
+    return this.serviceTypesModel.findOneAndUpdate({ _id }, updateUserInput);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} serviceType`;
+  /**
+   * delete user
+   * @param filter
+   * @returns
+   */
+  remove(filter: FilterQuery<ServiceTypesDocument>) {
+    return this.serviceTypesModel.deleteOne(filter);
   }
 }
